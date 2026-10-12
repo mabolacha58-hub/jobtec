@@ -243,6 +243,7 @@ const SCORE_BASE = 60;   // score de um perfil sem histórico
 const SCORE_MIN = 20;    // piso para perfis com reputação consistentemente má
 const SCORE_MAX = 99;
 const MEDIA_PLATAFORMA = 4.0; // média de referência: neutraliza avaliações isoladas
+const K = 3;                  // peso do "voto neutro" de Bayes (quão forte é a dúvida)
 
 // Média de Bayes: com poucas avaliações o resultado converge para a média da
 // plataforma, evitando que uma única nota determine a reputação.
@@ -273,7 +274,7 @@ async function recalcularReputacao(profissionalId: number): Promise<void> {
 
   const media = avals.rows.reduce((s: number, r: any) => s + Number(r.nota), 0) / n;
 
-  const suavizada = bayes(media, n, MEDIA_PLATAFORMA, 3);
+  const suavizada = bayes(media, n, MEDIA_PLATAFORMA, K);
   // -1..+1, com curva que expande o topo: na banda 4.0–5.0 é onde está a
   // diferenciação real, e uma escala linear achatava-a quase toda em 90.
   const qualidade = Math.sign(suavizada - MEDIA_PLATAFORMA) * Math.pow(Math.abs(suavizada - MEDIA_PLATAFORMA), 0.6);
